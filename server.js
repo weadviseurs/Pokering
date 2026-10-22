@@ -99,11 +99,9 @@ io.on('connection', (socket) => {
     const displayName = String(name || '').trim().slice(0, 24) || 'Anon';
     socket.join(roomId);
     const roomObj = getRoom(roomId);
+    // Add the newcomer as an un-voted voter WITHOUT touching anyone else's
+    // vote — a join (or leave) mid-round must not reset existing members.
     roomObj.players.set(socket.id, { name: displayName, vote: null, shown: false, role: 'voter' });
-    // A new participant means a new estimation context: clear the round so
-    // everyone (re)votes fresh. Prevents a stale/partial reveal from an early
-    // voter getting stuck when others join afterwards.
-    resetRound(roomObj);
     socket.emit('joined', { id: socket.id, roomId });
     broadcast(roomId);
   });
